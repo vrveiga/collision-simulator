@@ -1,11 +1,10 @@
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_log.h>
 #include <stdio.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
 #define MAX_BALLS 100
-#define VEL_SCALE 1.5f
+#define VEL_SCALE 3.0f
 
 typedef struct {
     float x, y;
@@ -129,18 +128,23 @@ int main(int argc, char *argv[])
     int numCollisions = 0;
     int dragging = 0;
     int startX = 0, startY = 0;
+    int curX = 0, curY = 0;
 
     while (running) {
         while (SDL_PollEvent(&e) != 0) {
             if(e.type == SDL_QUIT) {
                 running = 0;
             }
-            else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+            if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                 startX = e.button.x;
                 startY = e.button.y;
                 dragging = 1;
             }
-            else if (e.type == SDL_MOUSEBUTTONUP && e.button.button == SDL_BUTTON_LEFT && dragging) {
+            if (dragging) {
+                curX = e.motion.x;
+                curY = e.motion.y;
+            }
+            if (e.type == SDL_MOUSEBUTTONUP && e.button.button == SDL_BUTTON_LEFT && dragging) {
                 int endX = e.button.x;
                 int endY = e.button.y;
 
@@ -184,6 +188,14 @@ int main(int argc, char *argv[])
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+
+        if (dragging) {
+            float opX = 2*startX - curX;
+            float opY = 2*startY - curY;
+            
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderDrawLine(renderer, startX, startY, opX, opY);
+        }
 
         for (int i = 0; i < numBalls; i++) {
             render_ball(renderer, &balls[i]);
