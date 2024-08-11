@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_log.h>
 #include <stdio.h>
 
 #define SCREEN_WIDTH 800
@@ -13,6 +14,12 @@ typedef struct {
     float mass;
     SDL_Color color;
 } Ball;
+
+void print_data(int numBalls, int numCollisions) {
+    printf("DADOS DA SIMULAÇÃO\n");
+    printf("Contador de Partículas: %d\n", numBalls);
+    printf("Contador de Colisões: %d\n", numCollisions);
+}
 
 void render_ball(SDL_Renderer *renderer, Ball *ball)
 {
@@ -44,7 +51,7 @@ void update_ball_position(Ball *ball, float dt)
     }
 }
 
-void handle_collisions(Ball *balls, int numBalls)
+void handle_collisions(Ball *balls, int numBalls, int *numCollisions)
 {
     for (int i = 0; i < numBalls; i++) {
         for (int j = i + 1; j < numBalls; j++) {
@@ -67,12 +74,15 @@ void handle_collisions(Ball *balls, int numBalls)
                 balls[i].y -= overlap * ny;
                 balls[j].x += overlap * nx;
                 balls[j].y += overlap * ny;
+
+                (*numCollisions)++;
             }
         }
     }
 }
 
-void apply_friction(Ball *ball, float friction) {
+void apply_friction(Ball *ball, float friction)
+{
     if (ball->vx != 0 || ball->vy != 0) {
         ball->vx *= (1.0f - friction);
         ball->vy *= (1.0f - friction);
@@ -87,6 +97,7 @@ int main(int argc, char *argv[])
     float friction;
     printf("Atrito: ");
     scanf("%f", &friction);
+    printf("\n");
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("Erro iniciando o SDL: %s\n", SDL_GetError());
@@ -110,11 +121,12 @@ int main(int argc, char *argv[])
 
     Ball balls[MAX_BALLS];
     int numBalls = 0;
-
+    
     int running = 1;
     SDL_Event e;
     Uint32 lastTick = SDL_GetTicks(), currentTick;
 
+    int numCollisions = 0;
     int dragging = 0;
     int startX = 0, startY = 0;
 
@@ -165,7 +177,10 @@ int main(int argc, char *argv[])
             apply_friction(&balls[i], friction);
         }
 
-        handle_collisions(balls, numBalls);
+        handle_collisions(balls, numBalls, &numCollisions);
+
+        print_data(numBalls, numCollisions);
+        printf("\033[3A");
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -177,6 +192,8 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }
+
+    print_data(numBalls, numCollisions);
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
