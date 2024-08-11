@@ -36,7 +36,7 @@ void update_ball_position(Ball *ball, float dt)
 
     if (ball->x - ball->rad < 0 || ball->x + ball->rad > SCREEN_WIDTH) {
         ball->vx = -ball->vx;
-        ball->x = ball->x < ball->rad ? ball->rad : SCREEN_WIDTH - ball->rad; // que é isso?
+        ball->x = ball->x < ball->rad ? ball->rad : SCREEN_WIDTH - ball->rad;
     }
     if (ball->y - ball->rad < 0 || ball->y + ball->rad > SCREEN_HEIGHT) {
         ball->vy = -ball->vy;
@@ -62,7 +62,7 @@ void handle_collisions(Ball *balls, int numBalls)
                 balls[j].vx = balls[j].vx + p * balls[i].mass * nx;
                 balls[j].vy = balls[j].vy + p * balls[i].mass * ny;
 
-                float overlap = 0.5f * (balls[i].rad + balls[j].rad - distance + 1.0f); // 1.0f para evitar divisões por zero
+                float overlap = 0.5f * (balls[i].rad + balls[j].rad - distance + 1.0f);
                 balls[i].x -= overlap * nx;
                 balls[i].y -= overlap * ny;
                 balls[j].x += overlap * nx;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    SDL_Window *window = SDL_CreateWindow("Simulação", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_Window *window = SDL_CreateWindow("Simulador de Colisões", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL) {
         printf("Erro iniciando a janela: %s\n", SDL_GetError());
         SDL_Quit();
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
                         balls[numBalls].vy = -1 * (dy / distance) * distance * VEL_SCALE;
                     }
                     balls[numBalls].mass = 1.0f;
-                    balls[numBalls].rad = 15.0f;
+                    balls[numBalls].rad = 20.0f;
                     balls[numBalls].color = (SDL_Color){rand() % 256, rand() % 256, rand() % 256, 255};
                     numBalls++;
                 }
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < numBalls; i++) {
             update_ball_position(&balls[i], deltaTime);
-            apply_friction(&balls[i], friction)
+            apply_friction(&balls[i], friction);
         }
 
         handle_collisions(balls, numBalls);
