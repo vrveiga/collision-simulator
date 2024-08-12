@@ -3,7 +3,7 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
-#define MAX_BALLS 100
+#define MAX_BALLS 500
 #define VEL_SCALE 3.0f
 
 typedef struct {
@@ -14,7 +14,8 @@ typedef struct {
     SDL_Color color;
 } Ball;
 
-void print_data(int numBalls, int numCollisions) {
+void print_data(int numBalls, int numCollisions)
+{
     printf("DADOS DA SIMULAÇÃO\n");
     printf("Contador de Partículas: %d\n", numBalls);
     printf("Contador de Colisões: %d\n", numCollisions);
@@ -80,15 +81,19 @@ void handle_collisions(Ball *balls, int numBalls, int *numCollisions)
     }
 }
 
-void apply_friction(Ball *ball, float friction, float gravity)
+void apply_friction(Ball *ball, float friction)
 {
-    if (ball->vx != 0 || ball->vy != 0) {
+    if (friction > 0.0f) {
         ball->vx *= (1.0f - friction);
         ball->vy *= (1.0f - friction);
 
         if (fabs(ball->vx) < 0.01f) ball->vx = 0;
         if (fabs(ball->vy) < 0.01f) ball->vy = 0;
     }
+}
+
+void apply_gravity(Ball *ball, float gravity)
+{
     ball->vy += gravity;
 }
 
@@ -181,7 +186,8 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < numBalls; i++) {
             update_ball_position(&balls[i], deltaTime);
-            apply_friction(&balls[i], friction, gravity);
+            apply_friction(&balls[i], friction);
+            apply_gravity(&balls[i], gravity);
         }
 
         handle_collisions(balls, numBalls, &numCollisions);
