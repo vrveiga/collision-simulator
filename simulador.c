@@ -80,7 +80,7 @@ void handle_collisions(Ball *balls, int numBalls, int *numCollisions)
     }
 }
 
-void apply_friction(Ball *ball, float friction)
+void apply_friction(Ball *ball, float friction, float gravity)
 {
     if (ball->vx != 0 || ball->vy != 0) {
         ball->vx *= (1.0f - friction);
@@ -89,13 +89,16 @@ void apply_friction(Ball *ball, float friction)
         if (fabs(ball->vx) < 0.01f) ball->vx = 0;
         if (fabs(ball->vy) < 0.01f) ball->vy = 0;
     }
+    ball->vy += gravity;
 }
 
 int main(int argc, char *argv[])
 {
-    float friction;
+    float friction, gravity;
     printf("Atrito: ");
     scanf("%f", &friction);
+    printf("Gravidade: ");
+    scanf("%f", &gravity);
     printf("\n");
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -178,7 +181,7 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < numBalls; i++) {
             update_ball_position(&balls[i], deltaTime);
-            apply_friction(&balls[i], friction);
+            apply_friction(&balls[i], friction, gravity);
         }
 
         handle_collisions(balls, numBalls, &numCollisions);
