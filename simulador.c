@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
@@ -106,6 +107,8 @@ int main(int argc, char *argv[])
     scanf("%f", &gravity);
     printf("\n");
 
+    friction /= 10;
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("Erro iniciando o SDL: %s\n", SDL_GetError());
         return 1;
@@ -129,24 +132,24 @@ int main(int argc, char *argv[])
     Ball balls[MAX_BALLS];
     int numBalls = 0;
     
-    int running = 1;
+    bool running = true;
     SDL_Event e;
     Uint32 lastTick = SDL_GetTicks(), currentTick;
 
     int numCollisions = 0;
-    int dragging = 0;
+    bool dragging = true;
     int startX = 0, startY = 0;
     int curX = 0, curY = 0;
 
     while (running) {
         while (SDL_PollEvent(&e) != 0) {
             if(e.type == SDL_QUIT) {
-                running = 0;
+                running = false;
             }
             if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                 startX = e.button.x;
                 startY = e.button.y;
-                dragging = 1;
+                dragging = true;
             }
             if (dragging) {
                 curX = e.motion.x;
