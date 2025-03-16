@@ -37,10 +37,20 @@ void render_ball(SDL_Renderer *renderer, Ball *ball)
     }
 }
 
-void update_ball_position(Ball *ball, float dt)
+void update_ball_position(Ball *ball, float dt, float gravity, float friction)
 {
     ball->x += ball->vx * dt;
     ball->y += ball->vy * dt;
+
+    // Aplicar gravidade
+    ball->vy += gravity * dt;
+
+    // Aplicar atrito do ar
+    ball->vx *= (1.0f - friction * dt);
+    ball->vy *= (1.0f - friction * dt);
+
+    if (fabs(ball->vx) < 0.01f) ball->vx = 0;
+    if (fabs(ball->vy) < 0.01f) ball->vy = 0;
 
     if (ball->x - ball->rad < 0 || ball->x + ball->rad > SCREEN_WIDTH) {
         ball->vx = -ball->vx;
@@ -82,22 +92,6 @@ void handle_collisions(Ball *balls, int numBalls, int *numCollisions)
     }
 }
 
-void apply_friction(Ball *ball, float friction)
-{
-    if (friction > 0.0f) {
-        ball->vx *= (1.0f - friction);
-        ball->vy *= (1.0f - friction);
-
-        if (fabs(ball->vx) < 0.01f) ball->vx = 0;
-        if (fabs(ball->vy) < 0.01f) ball->vy = 0;
-    }
-}
-
-void apply_gravity(Ball *ball, float gravity)
-{
-    ball->vy += gravity;
-}
-
 int main(int argc, char *argv[])
 {
     float friction, gravity;
@@ -107,7 +101,8 @@ int main(int argc, char *argv[])
     scanf("%f", &gravity);
     printf("\n");
 
-    friction /= 10;
+    // friction /= 10;
+    gravity *= 100;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("Erro iniciando o SDL: %s\n", SDL_GetError());
@@ -188,9 +183,7 @@ int main(int argc, char *argv[])
         lastTick = currentTick;
 
         for (int i = 0; i < numBalls; i++) {
-            update_ball_position(&balls[i], deltaTime);
-            apply_friction(&balls[i], friction);
-            apply_gravity(&balls[i], gravity);
+            update_ball_position(&balls[i], deltaTime, gravity, friction);
         }
 
         handle_collisions(balls, numBalls, &numCollisions);
